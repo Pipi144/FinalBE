@@ -1,7 +1,10 @@
-namespace FinalBE.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace FinalAssignmentBE.Models;
 
 public class GameAttempt
 {
+    [Key]
     public int AttemptId { get; set; }
     public int Score { get; set; }
     public int GameId { get; set; }

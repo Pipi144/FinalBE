@@ -1,7 +1,5 @@
-using FinalBE.Models;
+using FinalAssignmentBE.Models;
 using Microsoft.EntityFrameworkCore;
-
-namespace FinalBE.Context;
 
 public class FinalAssignmentDbContext : DbContext
 {

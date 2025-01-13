@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.SignalR;
+using System.ComponentModel.DataAnnotations;
 
-namespace FinalBE.Models;
+namespace FinalAssignmentBE.Models;
 
 public class Game
 {
+    [Key]
     public int GameId { get; set; } 
     public string GameName { get; set; }
     public int TimeLimit { get; set; }
