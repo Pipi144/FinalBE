@@ -19,6 +19,10 @@ public class UserRepository : IUserRepository
     {
         try
         {
+            var users = _context.Users.ToList();
+            var matchingUsernameUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == user.Username);
+            if (matchingUsernameUser != null)
+                throw new ArgumentException($"Username {matchingUsernameUser.Username} is already taken");
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
@@ -34,7 +38,7 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            var entry = _context.Users.Update(user);
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return user;
         }
@@ -45,18 +49,20 @@ public class UserRepository : IUserRepository
         }
     }
 
-    public async Task<Boolean> DeleteUser(User user)
+    public async Task DeleteUser(long userId)
     {
         try
         {
-            _context.Users.Remove(user);
+            var deletedUser = await _context.Users.FirstOrDefaultAsync(user => user.UserId == userId);
+            if (deletedUser == null)
+                throw new KeyNotFoundException("User does not exist");
+            _context.Users.Remove(deletedUser);
             await _context.SaveChangesAsync();
-            return true;
         }
         catch (Exception e)
         {
             _logger.LogError("Error DeleteUser Repository: ", e, e.Message);
-            
+
             throw;
         }
     }
@@ -76,11 +82,16 @@ public class UserRepository : IUserRepository
         }
     }
 
-    public async Task<User?> GetUserById(int id)
+    public async Task<User?> GetUserById(long id)
     {
         try
         {
-            var user = await _context.Users.FindAsync(id);
+            if (id <0) 
+                throw new ArgumentException("User Id cannot be negative");
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (user == null)
+                throw new KeyNotFoundException("User does not exist");
             return user;
         }
         catch (Exception e)

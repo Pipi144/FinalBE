@@ -10,7 +10,6 @@ public class UserMapper:Profile
     {
         CreateMap<AddUserDto, User>();
         CreateMap<User, UserDto>();
-        CreateMap<UpdateUserDto, User>()
-            .ForMember(dest => dest.Games, opt => opt.Ignore());
+        
     }
 }

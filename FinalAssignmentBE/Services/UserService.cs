@@ -23,6 +23,8 @@ public class UserService : IUserService
         try
         {
             var user = _mapper.Map<User>(addUserDto);
+            
+            
             var result = await _userRepository.AddUser(user);
 
             return _mapper.Map<UserDto>(result);
@@ -34,7 +36,9 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<UserDto?> GetUserById(int id)
+    
+
+    public async Task<UserDto?> GetUserById(long id)
     {
         try
         {
@@ -62,27 +66,20 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<bool> DeleteUser(int id)
+    public async Task DeleteUser(long id)
     {
         try
         {
-            var user = await _userRepository.GetUserById(id);
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found");
-            }
-
-            await _userRepository.DeleteUser(user);
-            return true;
+            await _userRepository.DeleteUser(id);
         }
         catch (Exception e)
         {
-            _logger.LogError("Delete user service:", e.Message);
+            _logger.LogError("Error UserService DeleteUser:", e.Message);
             throw;
         }
     }
 
-    public async Task<UserDto> UpdateUser(int id, UpdateUserDto payload)
+    public async Task<UserDto> UpdateUser(long id, UpdateUserDto payload)
     {
         try
         {

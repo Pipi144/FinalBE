@@ -1,4 +1,5 @@
 using FinalAssignmentBE.Interfaces;
+using FinalAssignmentBE.Middleware;
 using FinalAssignmentBE.Repositories;
 using FinalAssignmentBE.Services;
 using Microsoft.EntityFrameworkCore;
@@ -38,11 +39,21 @@ builder.Services.AddDbContext<FinalAssignmentDbContext>(options =>
 // DI
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<IGameService, GameService>();
+
 
 
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
+
+// Configure middleware
+var errorHandlingMiddleware = new ErrorHandlingMiddleware();
+
+// Use the middleware
+app.Use(async (context, next) => await errorHandlingMiddleware.InvokeAsync(context, next));
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -50,7 +61,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API v1"); });
 }
-app.UseRouting();
+
 app.UseHttpsRedirection();
+app.UseRouting();
+app.MapControllers();
 
 app.Run();
