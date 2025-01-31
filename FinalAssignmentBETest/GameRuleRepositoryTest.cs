@@ -98,28 +98,6 @@ public class GameRuleRepositoryTest
     }
 
     [Test]
-    public void GetGameRuleById_InvalidId_ThrowsArgumentException()
-    {
-        //Arrange
-        long gameRuleId = -1;
-
-        // Act and Assert
-        Assert.That(async () => await _gameRuleRepository.GetGameRuleById(gameRuleId),
-            Throws.TypeOf<ArgumentException>().And.Message.EqualTo($"Id can't be negative {gameRuleId}"));
-    }
-
-    [Test]
-    public void GetGameRuleById_NotFoundGame_ThrowsNotFoundException()
-    {
-        //Arrange
-        long gameRuleId = 999;
-
-        //Act & Assert
-        Assert.That(async () => await _gameRuleRepository.GetGameRuleById(gameRuleId),
-            Throws.TypeOf<KeyNotFoundException>().And.Message.EqualTo($"Game rule id {gameRuleId} not found"));
-    }
-
-    [Test]
     public async Task GetGameRuleById_FoundGameRule_ReturnsGameRule()
     {
         // Arrange
@@ -134,6 +112,21 @@ public class GameRuleRepositoryTest
         Assert.That(result.DivisibleNumber, Is.EqualTo(3));
         Assert.That(result.ReplacedWord, Is.EqualTo("Peter"));
         Assert.That(result.GameId, Is.EqualTo(1));
+    }
+    
+    [Test]
+    public async Task GetGameRuleById_NotFoundGameRule_ReturnsNull()
+    {
+        // Arrange
+        long gameRuleId = 1000;
+        
+        
+        //Act
+        var result = await _gameRuleRepository.GetGameRuleById(gameRuleId);
+
+        //Assert
+        Assert.That(result, Is.Null);
+
     }
 
     [Test]

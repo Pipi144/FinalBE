@@ -8,6 +8,8 @@ public class Game
     public long GameId { get; set; } 
     public string GameName { get; set; }
     public int? TimeLimit { get; set; } = null;
+    
+    public int NumberRange { get; set; } = 20;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public long CreatedByUserId { get; set; }
     public User User { get; set; }

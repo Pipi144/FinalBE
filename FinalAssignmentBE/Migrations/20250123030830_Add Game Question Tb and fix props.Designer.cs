@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinalAssignmentBE.Migrations
 {
     [DbContext(typeof(FinalAssignmentDbContext))]
-    partial class FinalAssignmentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250123030830_Add Game Question Tb and fix props")]
+    partial class AddGameQuestionTbandfixprops
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,7 +95,10 @@ namespace FinalAssignmentBE.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("GameAttemptId")
+                    b.Property<long>("AttemptId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GameAttemptAttemptId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsCorrectAnswer")
@@ -107,9 +113,9 @@ namespace FinalAssignmentBE.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameAttemptId");
+                    b.HasIndex("GameAttemptAttemptId");
 
-                    b.ToTable("GameQuestions");
+                    b.ToTable("GameQuestion");
                 });
 
             modelBuilder.Entity("FinalAssignmentBE.Models.GameRule", b =>
@@ -192,7 +198,7 @@ namespace FinalAssignmentBE.Migrations
                 {
                     b.HasOne("FinalAssignmentBE.Models.GameAttempt", "GameAttempt")
                         .WithMany("GameQuestions")
-                        .HasForeignKey("GameAttemptId")
+                        .HasForeignKey("GameAttemptAttemptId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

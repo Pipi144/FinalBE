@@ -5,6 +5,8 @@ public class BasicGameRuleDto
 {
     public int DivisibleNumber { get; set; }
     public string ReplacedWord { get; set; }
+    public long GameId { get; set; }
+    
 }
 
 // Detailed Game Rule DTO including RuleId

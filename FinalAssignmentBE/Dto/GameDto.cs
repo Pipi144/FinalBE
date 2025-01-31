@@ -5,7 +5,9 @@ public class BasicGameDto
 {
     public long GameId { get; set; }
     public string GameName { get; set; }
-    public int TimeLimit { get; set; }
+    public int? TimeLimit { get; set; }
+    
+    public int NumberRange { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public long CreatedByUserId { get; set; }
 }

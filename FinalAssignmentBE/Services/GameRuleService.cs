@@ -31,13 +31,37 @@ public class GameRuleService:IGameRuleService
         }
     }
 
-    public Task<GameRuleDto> EditGameRule(EditGameRuleDto editPayloadDto)
+    public async Task<GameRuleDto> EditGameRule(long updatedId, EditGameRuleDto editPayloadDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var updatedGameRule = await _gameRuleRepository.GetGameRuleById(updatedId);
+            if (updatedGameRule == null)
+                throw new KeyNotFoundException($"Game rule with id {updatedId} not found");
+            if (editPayloadDto.DivisibleNumber != null)
+                updatedGameRule.DivisibleNumber = (int)editPayloadDto.DivisibleNumber;
+            if (editPayloadDto.ReplacedWord != null)
+                updatedGameRule.ReplacedWord = editPayloadDto.ReplacedWord;
+            var result = await _gameRuleRepository.UpdateGameRule(updatedGameRule);
+            return _mapper.Map<GameRuleDto>(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
-    public Task DeleteGameRuleById(long id)
+    public async Task DeleteGameRuleById(long id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await _gameRuleRepository.DeleteGameRuleById(id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }

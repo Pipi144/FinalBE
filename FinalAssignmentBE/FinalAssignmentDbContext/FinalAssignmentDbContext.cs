@@ -11,4 +11,6 @@ public class FinalAssignmentDbContext : DbContext
     public DbSet<GameRule> GameRules { get; set; }
     public DbSet<GameAttempt> GameAttempts { get; set; }
     
+    public DbSet<GameQuestion> GameQuestions { get; set; }
+    
 }

@@ -45,14 +45,12 @@ public class GameRuleRepository : IGameRuleRepository
         }
     }
 
-    public async Task<GameRule> GetGameRuleById(long id)
+    public async Task<GameRule?> GetGameRuleById(long id)
     {
         try
         {
-            if (id < 0) throw new ArgumentException($"Id can't be negative {id}");
             var result = await _context.GameRules.FindAsync(id);
-            if (result is null)
-                throw new KeyNotFoundException($"Game rule id {id} not found");
+
             return result;
         }
         catch (Exception e)

@@ -5,6 +5,6 @@ namespace FinalAssignmentBE.Interfaces;
 public interface IGameRuleService
 {
     public Task<GameRuleDto> AddGameRule(BasicGameRuleDto gameRule);
-    public Task<GameRuleDto> EditGameRule(EditGameRuleDto editPayloadDto);
+    public Task<GameRuleDto> EditGameRule(long updatedId, EditGameRuleDto editPayloadDto);
     public Task DeleteGameRuleById(long id);
 }

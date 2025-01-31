@@ -1,0 +1,27 @@
+using FinalAssignmentBE.Models;
+
+namespace FinalAssignmentBE.Dto;
+
+public class GameAttemptDto
+{
+    public long AttemptId { get; set; }
+
+    public int Score { get; set; } = 0;
+    public long GameId { get; set; }
+    public DateTime AttemptedDate { get; set; } = DateTime.UtcNow;
+    public long AttemptByUserId { get; set; }
+    public User AttemptByUser { get; set; }
+}
+
+
+public class AddGameAttemptDto
+{
+    public long GameId { get; set; }
+    public long AttemptByUserId { get; set; }
+}
+
+public class UpdateGameAttemptDto
+{
+    public long GameId { get; set; }
+    public int Score { get; set; } = 0;
+}
