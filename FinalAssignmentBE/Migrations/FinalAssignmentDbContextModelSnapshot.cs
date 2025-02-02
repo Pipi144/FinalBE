@@ -45,12 +45,9 @@ namespace FinalAssignmentBE.Migrations
                     b.Property<int?>("TimeLimit")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("GameId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("CreatedByUserId");
 
                     b.ToTable("Games");
                 });
@@ -162,7 +159,7 @@ namespace FinalAssignmentBE.Migrations
                 {
                     b.HasOne("FinalAssignmentBE.Models.User", "User")
                         .WithMany("Games")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

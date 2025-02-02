@@ -6,7 +6,7 @@ public class BasicGameDto
     public long GameId { get; set; }
     public string GameName { get; set; }
     public int? TimeLimit { get; set; }
-    
+
     public int NumberRange { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public long CreatedByUserId { get; set; }
@@ -15,17 +15,15 @@ public class BasicGameDto
 // Detailed Game DTO including User and GameRules
 public class GameDto : BasicGameDto
 {
-    
     public UserDto User { get; set; }
     public List<GameRuleDto> GameRules { get; set; } = new List<GameRuleDto>();
 }
-
-
 
 // DTO for querying games with optional filters
 public class GetGamesParamsDto
 {
     public long? CreatedByUserId { get; set; }
+    public string? GameName { get; set; }
 }
 
 // DTO for adding a new game

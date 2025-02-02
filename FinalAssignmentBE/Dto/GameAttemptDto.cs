@@ -10,7 +10,7 @@ public class GameAttemptDto
     public long GameId { get; set; }
     public DateTime AttemptedDate { get; set; } = DateTime.UtcNow;
     public long AttemptByUserId { get; set; }
-    public User AttemptByUser { get; set; }
+    public UserDto AttemptByUser { get; set; }
 }
 
 
@@ -20,8 +20,8 @@ public class AddGameAttemptDto
     public long AttemptByUserId { get; set; }
 }
 
-public class UpdateGameAttemptDto
+public class CheckAnswerDto
 {
-    public long GameId { get; set; }
-    public int Score { get; set; } = 0;
+    public long QuestionId { get; set; }
+    public string Answer { get; set; }
 }

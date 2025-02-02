@@ -17,20 +17,11 @@ public class GameAttempt
 
     public List<GameQuestion> GameQuestions { get; set; } = new List<GameQuestion>();
 
-
-    public void CheckAnswers(long questionId, string userAnswer)
+    public GameQuestion GenerateQuestion()
     {
-        // var matchingQuestion = GameQuestions.FirstOrDefault(q=>q.Id == questionId);
-        // if (matchingQuestion == null) throw new NullReferenceException($"Question {questionId} not found");
-        //
-        // var gameRules = Game.GameRules.ToList();
-        // var matchingRule = gameRules.FirstOrDefault(r => r.DivisibleNumber == matchingQuestion.QuestionNumber);
-        // if (matchingRule != null)
-        // {
-        //     if (userAnswer == matchingRule.ReplacedWord)
-        //     {
-        //         m
-        //     }
-        // }
+        int min = 0, max = Game.NumberRange;
+        Random random = new Random();
+        var newQuestion = new GameQuestion(random.Next(min, max + 1), AttemptId);
+        return newQuestion;
     }
 }

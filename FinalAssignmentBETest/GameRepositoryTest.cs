@@ -1,3 +1,4 @@
+using FinalAssignmentBE.Dto;
 using FinalAssignmentBE.Models;
 using FinalAssignmentBE.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,22 @@ public class GameRepositoryTest
         _gameRepository = new GameRepository(_dbContext, _mockLogger.Object);
 
         //Seed data
+        _dbContext.Users.AddRange(new List<User>()
+        {
+            new User()
+            {
+                UserId = 1,
+                Username = "TestUser1",
+                Password = "password"
+            },
+            new User()
+            {
+                UserId = 2,
+                Username = "TestUser2",
+                Password = "password"
+            }
+        });
+
         _dbContext.Games.AddRange(new List<Game>()
         {
             new Game()
@@ -97,11 +114,13 @@ public class GameRepositoryTest
     public async Task GetAllGames_WithFilter_NotFoundAny_ReturnsEmptyList()
     {
         //Arrange
-        long createdByUserId = 999;
-
+        var payload = new GetGamesParamsDto()
+        {
+            CreatedByUserId = 999
+        };
 
         //Act
-        var result = await _gameRepository.GetAllGames(createdByUserId);
+        var result = await _gameRepository.GetAllGames(payload);
 
         // Assert
         Assert.That(result.Count(), Is.EqualTo(0));
@@ -111,10 +130,14 @@ public class GameRepositoryTest
     public async Task GetAllGames_WithFilter_ReturnsMatchingGames()
     {
         // Arrange
-        long createdByUserId = 1;
+        var payload = new GetGamesParamsDto()
+        {
+            CreatedByUserId = 1
+        };
+
 
         //Act
-        var result = await _gameRepository.GetAllGames(createdByUserId);
+        var result = await _gameRepository.GetAllGames(payload);
 
         //Assert
         Assert.That(result.Count(g => g.GameName == "Pipi's game" || g.GameName == "MK's game"), Is.EqualTo(2));
@@ -124,10 +147,13 @@ public class GameRepositoryTest
     public void GetAllGames_WithFilter_FilterUserIdInvalid_ThrowsArgumentException()
     {
         // Arrange
-        long createdByUserId = -1;
+        var payload = new GetGamesParamsDto()
+        {
+            CreatedByUserId = -1
+        };
 
         //Act & Assert
-        Assert.That(async () => await _gameRepository.GetAllGames(createdByUserId),
+        Assert.That(async () => await _gameRepository.GetAllGames(payload),
             Throws.TypeOf<ArgumentException>().And.Message.EqualTo("User Id can't be negative."));
     }
 
@@ -150,7 +176,7 @@ public class GameRepositoryTest
 
         //Act & Assert
         Assert.That(async () => await _gameRepository.GetGameById(gameId),
-            Throws.TypeOf<KeyNotFoundException>().And.Message.EqualTo($"Game Id {gameId} not found."));
+            Throws.TypeOf<KeyNotFoundException>().And.Message.EqualTo($"Game with Id {gameId} not found."));
     }
 
     [Test]
@@ -250,6 +276,6 @@ public class GameRepositoryTest
 
         //Assert Act
         Assert.That(async () => await _gameRepository.DeleteGame(deletedGameId),
-            Throws.TypeOf<KeyNotFoundException>().And.Message.EqualTo($"Game Id {deletedGameId} not found."));
+            Throws.TypeOf<KeyNotFoundException>().And.Message.EqualTo($"Game with Id {deletedGameId} not found."));
     }
 }

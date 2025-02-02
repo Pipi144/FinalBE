@@ -1,3 +1,4 @@
+using FinalAssignmentBE.Dto;
 using FinalAssignmentBE.Interfaces;
 using FinalAssignmentBE.Models;
 using Microsoft.EntityFrameworkCore;
@@ -16,39 +17,61 @@ public class GameRepository : IGameRepository
     }
 
 
-    public async Task<IEnumerable<Game>> GetAllGames(long? userId)
+    public async Task<IEnumerable<Game>> GetAllGames(GetGamesParamsDto? getGamesParams)
     {
         try
         {
-            if (userId != null && userId < 0)
-                throw new ArgumentException("User Id can't be negative.");
-            var gamesQuery = _context.Games.AsQueryable();
-            if (userId != null)
-                gamesQuery = gamesQuery.Where(q => q.CreatedByUserId == userId)
-                    .OrderByDescending(q => q.CreatedAt);
-            return await gamesQuery.ToListAsync();
+            var query = _context.Games.AsQueryable();
+
+            if (getGamesParams != null)
+            {
+                if (getGamesParams.CreatedByUserId is < 0)
+                    throw new ArgumentException("User Id can't be negative.");
+
+                if (!string.IsNullOrEmpty(getGamesParams.GameName))
+                {
+                    query = query.Where(g => g.GameName == getGamesParams.GameName);
+                }
+
+                if (getGamesParams.CreatedByUserId.HasValue)
+                {
+                    query = query.Where(g => g.CreatedByUserId == getGamesParams.CreatedByUserId.Value);
+                }
+            }
+
+            // Apply default ordering by CreatedAt descending
+            query = query.OrderByDescending(g => g.CreatedAt);
+
+            // For read-only operations, disable change tracking
+            return await query.AsNoTracking().ToListAsync();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError("Error GameRepository GetAllGames:", e.Message);
+            _logger.LogError(ex, "Error in GetAllGames with parameters {@GetGamesParams}", getGamesParams);
             throw;
         }
     }
 
     public async Task<Game?> GetGameById(long id)
     {
+        if (id < 0)
+            throw new ArgumentException("Game Id can't be negative.");
+
         try
         {
-            if (id < 0)
-                throw new ArgumentException("Game Id can't be negative.");
-            var foundGame = await _context.Games.FirstOrDefaultAsync(g => g.GameId == id);
-            if (foundGame == null)
-                throw new KeyNotFoundException($"Game Id {id} not found.");
-            return foundGame;
+            var game = await _context.Games
+                .Include(g => g.User)
+                .Include(g => g.GameRules)
+                .FirstOrDefaultAsync(g => g.GameId == id);
+
+            if (game == null)
+                throw new KeyNotFoundException($"Game with Id {id} not found.");
+
+            return game;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError("Error GameRepository GetGameById:", e.Message);
+            _logger.LogError(ex, "Error in GetGameById for Id {GameId}", id);
             throw;
         }
     }
@@ -57,13 +80,19 @@ public class GameRepository : IGameRepository
     {
         try
         {
-            var newGame = await _context.Games.AddAsync(game);
+            var entry = await _context.Games.AddAsync(game);
             await _context.SaveChangesAsync();
-            return newGame.Entity;
+
+            // Explicitly load the related User navigation property
+            await _context.Entry(entry.Entity)
+                .Reference(g => g.User)
+                .LoadAsync();
+
+            return entry.Entity;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError("Error GameRepository.AddGame:", e.Message);
+            _logger.LogError(ex, "Error in AddGame for game {@Game}", game);
             throw;
         }
     }
@@ -76,9 +105,9 @@ public class GameRepository : IGameRepository
             await _context.SaveChangesAsync();
             return game;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError("Error GameRepository.UpdateGame:", e.Message);
+            _logger.LogError(ex, "Error in UpdateGame for game {@Game}", game);
             throw;
         }
     }
@@ -87,14 +116,16 @@ public class GameRepository : IGameRepository
     {
         try
         {
-            var gameToDelete = await _context.Games.FirstOrDefaultAsync(g => g.GameId == id);
-            if (gameToDelete == null) throw new KeyNotFoundException($"Game Id {id} not found.");
-            _context.Games.Remove(gameToDelete);
+            var game = await _context.Games.FindAsync(id);
+            if (game == null)
+                throw new KeyNotFoundException($"Game with Id {id} not found.");
+
+            _context.Games.Remove(game);
             await _context.SaveChangesAsync();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError("Error GameRepository.DeleteGame:", e.Message);
+            _logger.LogError(ex, "Error in DeleteGame for Id {GameId}", id);
             throw;
         }
     }

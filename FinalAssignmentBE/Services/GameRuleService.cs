@@ -5,18 +5,20 @@ using FinalAssignmentBE.Models;
 
 namespace FinalAssignmentBE.Services;
 
-public class GameRuleService:IGameRuleService
+public class GameRuleService : IGameRuleService
 {
     private readonly IGameRuleRepository _gameRuleRepository;
     private readonly ILogger<GameRuleService> _logger;
     private IMapper _mapper;
+
     public GameRuleService(IGameRuleRepository gameRuleRepository, ILogger<GameRuleService> logger, IMapper mapper)
     {
         _gameRuleRepository = gameRuleRepository;
         _logger = logger;
         _mapper = mapper;
     }
-    public async Task<GameRuleDto> AddGameRule(BasicGameRuleDto gameRule)
+
+    public async Task<GameRuleDto> AddGameRule(AddGameRuleDto gameRule)
     {
         try
         {
@@ -26,7 +28,7 @@ public class GameRuleService:IGameRuleService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError("Error GameRuleService=> AddGameRule:", e.Message);
             throw;
         }
     }
@@ -47,7 +49,7 @@ public class GameRuleService:IGameRuleService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError("Error GameRuleService=> EditGameRule:", e.Message);
             throw;
         }
     }
@@ -60,7 +62,7 @@ public class GameRuleService:IGameRuleService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError("Error GameRuleService=> DeleteGameRuleById:", e.Message);
             throw;
         }
     }

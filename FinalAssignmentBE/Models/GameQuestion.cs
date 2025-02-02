@@ -11,4 +11,14 @@ public class GameQuestion
     public bool IsCorrectAnswer { get; set; } = false;
     public long GameAttemptId { get; set; }
     public GameAttempt GameAttempt { get; set; }
+
+    public GameQuestion()
+    {
+    }
+
+    public GameQuestion(int questionNumber, long gameAttemptId)
+    {
+        QuestionNumber = questionNumber;
+        GameAttemptId = gameAttemptId;
+    }
 }

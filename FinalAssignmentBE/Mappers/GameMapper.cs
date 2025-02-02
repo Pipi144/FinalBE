@@ -4,7 +4,7 @@ using FinalAssignmentBE.Models;
 
 namespace FinalAssignmentBE.Mappers;
 
-public class GameMapper: Profile
+public class GameMapper : Profile
 {
     public GameMapper()
     {
@@ -18,7 +18,13 @@ public class GameMapper: Profile
 
         // Map AddGameDto to Game
         CreateMap<AddGameDto, Game>()
-            .ForMember(dest => dest.GameRules, opt => opt.MapFrom(src => src.GameRules));
-        
+            .ForMember(dest => dest.GameRules, opt => opt.MapFrom(src =>
+                src.GameRules != null
+                    ? src.GameRules.Select(rule => new GameRule
+                    {
+                        DivisibleNumber = rule.DivisibleNumber,
+                        ReplacedWord = rule.ReplacedWord
+                    }).ToList()
+                    : new List<GameRule>()));
     }
 }

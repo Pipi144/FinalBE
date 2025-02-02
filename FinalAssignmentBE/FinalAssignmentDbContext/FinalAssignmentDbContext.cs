@@ -13,4 +13,11 @@ public class FinalAssignmentDbContext : DbContext
     
     public DbSet<GameQuestion> GameQuestions { get; set; }
     
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Game>()
+            .HasOne(g => g.User)
+            .WithMany(u => u.Games)
+            .HasForeignKey(g => g.CreatedByUserId);
+    }
 }

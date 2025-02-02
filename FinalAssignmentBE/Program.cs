@@ -41,8 +41,11 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IGameService, GameService>();
-
-
+builder.Services.AddScoped<IGameAttemptRepository, GameAttemptRepository>();
+builder.Services.AddScoped<IGameAttemptService, GameAttemptService>();
+builder.Services.AddScoped<IGameRuleRepository, GameRuleRepository>();
+builder.Services.AddScoped<IGameRuleService, GameRuleService>();
+builder.Services.AddScoped<IGameQuestionRepository, GameQuestionRepository>();
 
 builder.Services.AddHttpClient();
 

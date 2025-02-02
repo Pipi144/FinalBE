@@ -29,7 +29,7 @@ public class GameRuleServiceTest
     public async Task AddGameRule_Success_ReturnsAddedGameRule()
     {
         // Arrange
-        var newGameRuleDto = new BasicGameRuleDto()
+        var newGameRuleDto = new AddGameRuleDto()
         {
             DivisibleNumber = 4,
             ReplacedWord = "Peterfour",
@@ -96,14 +96,14 @@ public class GameRuleServiceTest
             RuleId = updatedGameRuleId,
             DivisibleNumber = 4,
             ReplacedWord = "Peterfour",
-            GameId = 1
+ 
         };
         var updatedGameRuleDto = new GameRuleDto()
         {
             RuleId = updatedGameRuleId,
             DivisibleNumber = 10,
             ReplacedWord = "Peter test updated",
-            GameId = 1
+   
         };
 
         _mockGameRuleRepository.Setup(s => s.GetGameRuleById(1)).ReturnsAsync(updatedGameRule);

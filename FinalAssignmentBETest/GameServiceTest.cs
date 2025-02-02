@@ -25,40 +25,39 @@ public class GameServiceTest
         _mockMapper = new Mock<IMapper>();
         _gameService = new GameService(_mockGameRepository.Object, _mockLogger.Object, _mockMapper.Object);
 
-        _games =
-        [
-            new Game()
+        _games = new List<Game>
+        {
+            new Game
             {
                 GameId = 1,
                 GameName = "Pipi's game",
                 CreatedByUserId = 1,
-                GameRules =
-                [
-                    new GameRule()
+                GameRules = new List<GameRule>
+                {
+                    new GameRule
                     {
                         GameId = 1,
                         RuleId = 1,
                         DivisibleNumber = 3,
                         ReplacedWord = "Pipi"
                     },
-
-                    new GameRule()
+                    new GameRule
                     {
                         GameId = 1,
                         RuleId = 2,
                         DivisibleNumber = 7,
                         ReplacedWord = "mary"
                     }
-                ]
+                }
             },
-            new Game()
+            new Game
             {
                 GameId = 2,
                 GameName = "Metusela's game",
                 CreatedByUserId = 2,
-                GameRules = new List<GameRule>()
+                GameRules = new List<GameRule>
                 {
-                    new GameRule()
+                    new GameRule
                     {
                         GameId = 2,
                         RuleId = 3,
@@ -67,13 +66,14 @@ public class GameServiceTest
                     }
                 }
             },
-            new Game()
+            new Game
             {
                 GameId = 3,
                 GameName = "MK's game",
-                CreatedByUserId = 1
+                CreatedByUserId = 1,
+                GameRules = new List<GameRule>() // even if empty, this is more explicit
             }
-        ];
+        };
     }
 
 
@@ -131,10 +131,10 @@ public class GameServiceTest
                 CreatedAt = DateTime.UtcNow
             },
         };
+        var filteredGames = _games.Where(g => g.CreatedByUserId == filterParams.CreatedByUserId).ToList();
 
-
-        _mockGameRepository.Setup(s => s.GetAllGames(filterParams.CreatedByUserId)).ReturnsAsync(_games);
-        _mockMapper.Setup(m => m.Map<List<BasicGameDto>>(_games)).Returns(expectedGameList);
+        _mockGameRepository.Setup(s => s.GetAllGames(filterParams)).ReturnsAsync(filteredGames);
+        _mockMapper.Setup(m => m.Map<List<BasicGameDto>>(filteredGames)).Returns(expectedGameList);
 
         //Act
         var result = await _gameService.GetAllGames(filterParams);
@@ -156,7 +156,7 @@ public class GameServiceTest
         };
         var gamesFiltered = new List<Game>(_games.Where(g => g.CreatedByUserId == filterParams.CreatedByUserId));
 
-        _mockGameRepository.Setup(s => s.GetAllGames(filterParams.CreatedByUserId))
+        _mockGameRepository.Setup(s => s.GetAllGames(filterParams))
             .ReturnsAsync(gamesFiltered);
         _mockMapper.Setup(m => m.Map<List<BasicGameDto>>(gamesFiltered)).Returns([]);
 
@@ -265,11 +265,10 @@ public class GameServiceTest
             GameId = 10,
             GameName = "New Game",
             CreatedByUserId = 1,
-            User = new User
+            User = new User()
             {
-                Username = "Pipi1234",
-                Password = "pipi",
-                UserId = 1
+                UserId = 1,
+                Username = "User1",
             },
             CreatedAt = DateTime.UtcNow,
             GameRules = new List<GameRule>
@@ -285,10 +284,10 @@ public class GameServiceTest
             GameName = expectedNewGame.GameName,
             CreatedByUserId = expectedNewGame.CreatedByUserId,
             CreatedAt = expectedNewGame.CreatedAt,
-            User = new UserDto
+            User = new UserDto()
             {
                 UserId = expectedNewGame.User.UserId,
-                Username = expectedNewGame.User.Username
+                Username = expectedNewGame.User.Username,
             },
             GameRules = new List<GameRuleDto>
             {
@@ -299,7 +298,7 @@ public class GameServiceTest
 
         _mockGameRepository.Setup(s => s.AddGame(It.IsAny<Game>())).ReturnsAsync(expectedNewGame);
         _mockMapper.Setup(m => m.Map<GameDto>(It.IsAny<Game>())).Returns(expectedNewGameDto);
-
+        _mockMapper.Setup(m => m.Map<Game>(newGameDto)).Returns(expectedNewGame);
         // Act
         var result = await _gameService.AddGame(newGameDto);
 
@@ -309,6 +308,34 @@ public class GameServiceTest
         Assert.That(result.GameId, Is.EqualTo(expectedNewGame.GameId));
         Assert.That(result.User.UserId, Is.EqualTo(expectedNewGame.User.UserId));
         Assert.That(result.GameRules.Count, Is.EqualTo(expectedNewGame.GameRules.Count));
+    }
+
+    [Test]
+    public async Task AddGame_GameNameExist_ThrowsArgumentException()
+    {
+        // Arrange
+        var newGameDto = new AddGameDto
+        {
+            GameName = "Pipi's game",
+            CreatedByUserId = 1,
+            GameRules = new List<BasicGameRuleDto>()
+        };
+
+        var getGamePayload = new GetGamesParamsDto
+        {
+            GameName = "Pipi's game"
+        };
+
+        // Setup the repository mock to return games that have the same name
+        _mockGameRepository
+            .Setup(repo => repo.GetAllGames(It.Is<GetGamesParamsDto>(p => p.GameName == "Pipi's game")))
+            .ReturnsAsync(_games.Where(g => g.GameName == "Pipi's game").ToList());
+
+        // Act & Assert
+        Assert.That(async () =>
+                await _gameService.AddGame(newGameDto),
+            Throws.TypeOf<ArgumentException>().And.Message
+                .EqualTo($"Game with name {getGamePayload.GameName} already exists."));
     }
 
     [Test]
@@ -389,12 +416,13 @@ public class GameServiceTest
     {
         // Arrange
         var deletedGameId = 99;
-        _mockGameRepository.Setup(s => s.DeleteGame(deletedGameId)).ThrowsAsync(new KeyNotFoundException($"Game Id {deletedGameId} not found."));
-        
-        
+        _mockGameRepository.Setup(s => s.DeleteGame(deletedGameId))
+            .ThrowsAsync(new KeyNotFoundException($"Game Id {deletedGameId} not found."));
+
+
         //Act & Assert
-        Assert.That(async()=>await _gameService.DeleteGame(deletedGameId), Throws.TypeOf<KeyNotFoundException>().And.Message.EqualTo($"Game Id {deletedGameId} not found."));
-        
+        Assert.That(async () => await _gameService.DeleteGame(deletedGameId),
+            Throws.TypeOf<KeyNotFoundException>().And.Message.EqualTo($"Game Id {deletedGameId} not found."));
     }
 
 
@@ -403,10 +431,10 @@ public class GameServiceTest
     {
         //Arrange
         var deletedGameId = 1;
-        
+
         //Act 
         await _gameService.DeleteGame(deletedGameId);
-        
+
         //Assert
         _mockGameRepository.Verify(s => s.DeleteGame(deletedGameId), Times.Once);
     }

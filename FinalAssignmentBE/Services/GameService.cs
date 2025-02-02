@@ -23,14 +23,12 @@ public class GameService : IGameService
     {
         try
         {
-            var games = await _gameRepository.GetAllGames(getGamesParams?.CreatedByUserId);
-
+            var games = await _gameRepository.GetAllGames(getGamesParams);
             return _mapper.Map<List<BasicGameDto>>(games);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            _logger.LogError("Error Game Service GetAllGames:", e.Message);
+            _logger.LogError("Error Game Service GetAllGames: {Message}", e.Message);
             throw;
         }
     }
@@ -44,7 +42,7 @@ public class GameService : IGameService
         }
         catch (Exception e)
         {
-            _logger.LogError("Error Game Service GetGameById:", e.Message);
+            _logger.LogError("Error Game Service GetGameById: {Message}", e.Message);
             throw;
         }
     }
@@ -53,13 +51,42 @@ public class GameService : IGameService
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(addGameDto.GameName))
+                throw new ArgumentException("Game name cannot be empty.");
+
+            if (addGameDto.TimeLimit < 0)
+                throw new ArgumentException("Time limit cannot be negative.");
+            var gamesWithMatchingName = await _gameRepository.GetAllGames(new GetGamesParamsDto()
+            {
+                GameName = addGameDto.GameName
+            });
+            if (gamesWithMatchingName.Any())
+                throw new ArgumentException($"Game with name {addGameDto.GameName} already exists.");
             var game = _mapper.Map<Game>(addGameDto);
+
+            if (game.GameRules.Any())
+            {
+                foreach (var rule in game.GameRules)
+                {
+                    rule.Game = game;
+                }
+            }
+            else
+            {
+                game.GameRules = new List<GameRule>();
+            }
+
             var newGame = await _gameRepository.AddGame(game);
             return _mapper.Map<GameDto>(newGame);
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError("Validation Error in Game Service AddGame: {Message}", ex.Message);
+            throw;
+        }
         catch (Exception e)
         {
-            _logger.LogError("Error Game Service AddGame:", e.Message);
+            _logger.LogError("Error in Game Service AddGame: {Message}", e.Message);
             throw;
         }
     }

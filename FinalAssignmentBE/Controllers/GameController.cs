@@ -69,7 +69,7 @@ namespace FinalAssignmentBE.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError("Error GameController CreateGame:", e.Message);
+                _logger.LogError("Error GameController CreateGame:", e);
                 // return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
                 throw;
             }

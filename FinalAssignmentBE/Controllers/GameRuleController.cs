@@ -1,3 +1,5 @@
+using FinalAssignmentBE.Dto;
+using FinalAssignmentBE.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,36 +9,74 @@ namespace FinalAssignmentBE.Controllers
     [ApiController]
     public class GameRuleController : ControllerBase
     {
-        // GET: api/<GameRuleController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        private readonly IGameRuleService _gameRuleService;
+        private readonly ILogger<GameRuleController> _logger;
 
-        // GET api/<GameRuleController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        public GameRuleController(IGameRuleService gameRuleService, ILogger<GameRuleController> logger)
         {
-            return "value";
+            _gameRuleService = gameRuleService;
+            _logger = logger;
         }
+        // // GET: api/<GameRuleController>
+        // [HttpGet]
+        // public IEnumerable<string> Get()
+        // {
+        //     return new string[] { "value1", "value2" };
+        // }
+        //
+        // // GET api/<GameRuleController>/5
+        // [HttpGet("{id}")]
+        // public string Get(int id)
+        // {
+        //     return "value";
+        // }
 
         // POST api/<GameRuleController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<GameRuleDto>> AddGameRule([FromBody] AddGameRuleDto gameRule)
         {
+            try
+            {
+                var result = await _gameRuleService.AddGameRule(gameRule);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("ERROR GameRuleController => AddGameRule:", e.Message);
+                throw;
+            }
         }
 
         // PUT api/<GameRuleController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<GameRuleDto>> EditGameRule(int id, [FromBody] EditGameRuleDto payload)
         {
+            try
+            {
+                var result = await _gameRuleService.EditGameRule(id, payload);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("ERROR GameRuleController => EditGameRule:", e.Message);
+                throw;
+            }
         }
 
         // DELETE api/<GameRuleController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> DeleteGameRule(int id)
         {
+            try
+            {
+                await _gameRuleService.DeleteGameRuleById(id);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }
