@@ -56,6 +56,9 @@ public class GameService : IGameService
 
             if (addGameDto.TimeLimit < 0)
                 throw new ArgumentException("Time limit cannot be negative.");
+
+            if (addGameDto.NumberRange < 0) throw new ArgumentException("Number range cannot be negative.");
+
             var gamesWithMatchingName = await _gameRepository.GetAllGames(new GetGamesParamsDto()
             {
                 GameName = addGameDto.GameName
@@ -84,6 +87,7 @@ public class GameService : IGameService
             _logger.LogError("Validation Error in Game Service AddGame: {Message}", ex.Message);
             throw;
         }
+
         catch (Exception e)
         {
             _logger.LogError("Error in Game Service AddGame: {Message}", e.Message);

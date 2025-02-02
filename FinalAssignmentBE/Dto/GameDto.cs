@@ -32,6 +32,8 @@ public class AddGameDto
     public string GameName { get; set; }
     public int TimeLimit { get; set; }
     public long CreatedByUserId { get; set; }
+
+    public int NumberRange { get; set; } = 20;
     public List<BasicGameRuleDto> GameRules { get; set; } = new List<BasicGameRuleDto>();
 }
 

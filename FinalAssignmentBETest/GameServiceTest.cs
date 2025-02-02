@@ -311,7 +311,7 @@ public class GameServiceTest
     }
 
     [Test]
-    public async Task AddGame_GameNameExist_ThrowsArgumentException()
+    public void AddGame_GameNameExist_ThrowsArgumentException()
     {
         // Arrange
         var newGameDto = new AddGameDto
@@ -338,6 +338,63 @@ public class GameServiceTest
                 .EqualTo($"Game with name {getGamePayload.GameName} already exists."));
     }
 
+    [Test]
+    public void AddGame_GameNameEmpty_ThrowsArgumentException()
+    {
+        // Arrange
+        var newGameDto = new AddGameDto
+        {
+            GameName = "",
+            CreatedByUserId = 1,
+            GameRules = new List<BasicGameRuleDto>()
+        };
+
+        // Act & Assert
+        Assert.That(async () =>
+                await _gameService.AddGame(newGameDto),
+            Throws.TypeOf<ArgumentException>().And.Message
+                .EqualTo("Game name cannot be empty."));
+    }
+
+    [Test]
+    public void AddGame_TimeLimitInvalid_ThrowsArgumentException()
+    {
+        // Arrange
+        var newGameDto = new AddGameDto
+        {
+            GameName = "hello",
+            CreatedByUserId = 1,
+            GameRules = new List<BasicGameRuleDto>(),
+            TimeLimit = -10
+        };
+
+        // Act & Assert
+        Assert.That(async () =>
+                await _gameService.AddGame(newGameDto),
+            Throws.TypeOf<ArgumentException>().And.Message
+                .EqualTo("Time limit cannot be negative."));
+    }
+
+    [Test]
+    public void AddGame_NumberRangeInvalid_ThrowsArgumentException()
+    {
+        // Arrange
+        var newGameDto = new AddGameDto
+        {
+            GameName = "hello",
+            CreatedByUserId = 1,
+            GameRules = new List<BasicGameRuleDto>(),
+            TimeLimit = 10,
+            NumberRange = -100
+        };
+
+        // Act & Assert
+        Assert.That(async () =>
+                await _gameService.AddGame(newGameDto),
+            Throws.TypeOf<ArgumentException>().And.Message
+                .EqualTo("Number range cannot be negative."));
+    }
+    
     [Test]
     public async Task UpdateGame_Success_ReturnsGame()
     {

@@ -67,6 +67,7 @@ namespace FinalAssignmentBE.Controllers
                 var newGame = await _gameService.AddGame(addGameDto);
                 return CreatedAtAction(nameof(GetGameById), new { id = newGame.GameId }, newGame);
             }
+
             catch (Exception e)
             {
                 _logger.LogError("Error GameController CreateGame:", e);
