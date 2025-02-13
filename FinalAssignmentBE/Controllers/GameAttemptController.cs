@@ -57,10 +57,11 @@ namespace FinalAssignmentBE.Controllers
 
         // GET api/game-attempt/generate-question/{id}
         [HttpGet("generate-question/{id}")]
-        public async Task<ActionResult<GameQuestionDto>> GenerateQuestion(long id)
+        public async Task<ActionResult<GameQuestionDto>> GenerateQuestion([FromRoute] long id)
         {
             try
             {
+                _logger.LogInformation("GenerateQuestion called with GameAttemptId: {GameAttemptId}", id);
                 var res = await _gameAttemptService.GenerateQuestion(id);
                 return Ok(res);
             }

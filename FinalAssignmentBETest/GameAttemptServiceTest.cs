@@ -276,10 +276,9 @@ public class GameAttemptServiceTest
             IsCorrectAnswer = isCorrectAnswer,
             UserAnswer = checkPayload.Answer
         };
+
         _mockGameQuestionRepository.Setup(s => s.GetGameQuestionById(checkPayload.QuestionId))
             .ReturnsAsync(expectedQuestion);
-        _mockGameAttemptRepository.Setup(s => s.UpdateGameAttempt(gameAttempt))
-            .ReturnsAsync(gameAttempt);
         _mockMapper.Setup(m => m.Map<GameQuestionDto>(It.IsAny<GameQuestion>())).Returns(updatedQuestionDto);
 
         //Act
@@ -292,8 +291,13 @@ public class GameAttemptServiceTest
         _mockGameAttemptRepository.Verify(
             s => s.UpdateGameAttempt(It.Is<GameAttempt>(g => g.AttemptId == 1 && g.Score == 1)),
             Times.Once);
+        _mockGameQuestionRepository.Verify(
+            s => s.UpdateGameQuestion(It.Is<GameQuestion>(q =>
+                q.Id == expectedQuestion.Id && q.IsCorrectAnswer == isCorrectAnswer &&
+                q.UserAnswer == checkPayload.Answer)),
+            Times.Once);
     }
-    
+
     [Test]
     public async Task CheckAnswer_MatchOneRule_AnswerIncorrect_KeepAttemptScoreAndReturnsUpdatedQuestion()
     {
@@ -357,8 +361,6 @@ public class GameAttemptServiceTest
         };
         _mockGameQuestionRepository.Setup(s => s.GetGameQuestionById(checkPayload.QuestionId))
             .ReturnsAsync(expectedQuestion);
-        _mockGameAttemptRepository.Setup(s => s.UpdateGameAttempt(gameAttempt))
-            .ReturnsAsync(gameAttempt);
         _mockMapper.Setup(m => m.Map<GameQuestionDto>(It.IsAny<GameQuestion>())).Returns(updatedQuestionDto);
 
         //Act
@@ -370,6 +372,11 @@ public class GameAttemptServiceTest
         // Verify that UpdateGameAttempt was called with the updated attempt
         _mockGameAttemptRepository.Verify(
             s => s.UpdateGameAttempt(It.Is<GameAttempt>(g => g.AttemptId == 1 && g.Score == 0)),
+            Times.Once);
+        _mockGameQuestionRepository.Verify(
+            s => s.UpdateGameQuestion(It.Is<GameQuestion>(q =>
+                q.Id == expectedQuestion.Id && q.IsCorrectAnswer == isCorrectAnswer &&
+                q.UserAnswer == checkPayload.Answer)),
             Times.Once);
     }
 
@@ -428,7 +435,6 @@ public class GameAttemptServiceTest
         };
         var isCorrectAnswer = mockGame.CheckAnswer(expectedQuestion.QuestionNumber, checkPayload.Answer);
 
-
         var updatedQuestionDto = new GameQuestionDto()
         {
             Id = 1,
@@ -438,8 +444,7 @@ public class GameAttemptServiceTest
         };
         _mockGameQuestionRepository.Setup(s => s.GetGameQuestionById(checkPayload.QuestionId))
             .ReturnsAsync(expectedQuestion);
-        _mockGameAttemptRepository.Setup(s => s.UpdateGameAttempt(gameAttempt))
-            .ReturnsAsync(gameAttempt);
+
         _mockMapper.Setup(m => m.Map<GameQuestionDto>(It.IsAny<GameQuestion>())).Returns(updatedQuestionDto);
 
         //Act
@@ -452,6 +457,10 @@ public class GameAttemptServiceTest
         _mockGameAttemptRepository.Verify(
             s => s.UpdateGameAttempt(It.Is<GameAttempt>(g =>
                 g.AttemptId == 1 && g.Score == 1)),
+            Times.Once);
+        _mockGameQuestionRepository.Verify(
+            s => s.UpdateGameQuestion(It.Is<GameQuestion>(q =>
+                q.Id == expectedQuestion.Id && q.IsCorrectAnswer == isCorrectAnswer && q.UserAnswer == checkPayload.Answer)),
             Times.Once);
     }
 
@@ -520,8 +529,7 @@ public class GameAttemptServiceTest
         };
         _mockGameQuestionRepository.Setup(s => s.GetGameQuestionById(checkPayload.QuestionId))
             .ReturnsAsync(expectedQuestion);
-        _mockGameAttemptRepository.Setup(s => s.UpdateGameAttempt(gameAttempt))
-            .ReturnsAsync(gameAttempt);
+
         _mockMapper.Setup(m => m.Map<GameQuestionDto>(It.IsAny<GameQuestion>())).Returns(updatedQuestionDto);
 
         //Act
@@ -534,6 +542,10 @@ public class GameAttemptServiceTest
         _mockGameAttemptRepository.Verify(
             s => s.UpdateGameAttempt(It.Is<GameAttempt>(g =>
                 g.AttemptId == 1 && g.Score == 0)),
+            Times.Once);
+        _mockGameQuestionRepository.Verify(
+            s => s.UpdateGameQuestion(It.Is<GameQuestion>(q =>
+                q.Id == expectedQuestion.Id && q.IsCorrectAnswer == isCorrectAnswer && q.UserAnswer == checkPayload.Answer)),
             Times.Once);
     }
 
@@ -601,8 +613,7 @@ public class GameAttemptServiceTest
         };
         _mockGameQuestionRepository.Setup(s => s.GetGameQuestionById(checkPayload.QuestionId))
             .ReturnsAsync(expectedQuestion);
-        _mockGameAttemptRepository.Setup(s => s.UpdateGameAttempt(gameAttempt))
-            .ReturnsAsync(gameAttempt);
+
         _mockMapper.Setup(m => m.Map<GameQuestionDto>(It.IsAny<GameQuestion>())).Returns(updatedQuestionDto);
 
         //Act
@@ -614,6 +625,11 @@ public class GameAttemptServiceTest
         // Verify that UpdateGameAttempt was called with the updated attempt
         _mockGameAttemptRepository.Verify(
             s => s.UpdateGameAttempt(It.Is<GameAttempt>(g => g.AttemptId == 1 && g.Score == 1)),
+            Times.Once);
+        
+        _mockGameQuestionRepository.Verify(
+            s => s.UpdateGameQuestion(It.Is<GameQuestion>(q =>
+                q.Id == expectedQuestion.Id && q.IsCorrectAnswer == isCorrectAnswer && q.UserAnswer == checkPayload.Answer)),
             Times.Once);
     }
 

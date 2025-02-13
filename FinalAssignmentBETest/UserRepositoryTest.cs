@@ -144,20 +144,4 @@ public class UserRepositoryTest
         Assert.That(addedUser.UserId, Is.EqualTo(10));
         Assert.That(_dbContext.Users.Count(), Is.EqualTo(4));
     }
-
-    [Test]
-    public void AddUser_InvalidUser_ThrowArgumentException()
-    {
-        // Arrange
-        var duplicatedUser = new User { UserId = 10, Username = "Pipi", Password = "newpassword" };
-
-        // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
-            await _userRepository.AddUser(duplicatedUser)
-        );
-
-        // Verify the exception
-        Assert.That(exception, Is.Not.Null);
-        Assert.That(exception.Message, Is.EqualTo($"Username {duplicatedUser.Username} is already taken"));
-    }
 }

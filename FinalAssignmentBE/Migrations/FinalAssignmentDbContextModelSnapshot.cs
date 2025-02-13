@@ -42,7 +42,7 @@ namespace FinalAssignmentBE.Migrations
                     b.Property<int>("NumberRange")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("TimeLimit")
+                    b.Property<int>("TimeLimit")
                         .HasColumnType("integer");
 
                     b.HasKey("GameId");

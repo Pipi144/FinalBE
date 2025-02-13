@@ -1,10 +1,11 @@
+using System.Security.Authentication;
 using AutoMapper;
 using FinalAssignmentBE.Dto;
 using FinalAssignmentBE.Interfaces;
 using FinalAssignmentBE.Models;
 using FinalAssignmentBE.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
 using Moq;
 
 namespace FinalAssignmentBETest;
@@ -24,35 +25,47 @@ public class UserServiceTest
         _loggerMock = new Mock<ILogger<UserService>>();
         _mapperMock = new Mock<IMapper>();
         _userService = new UserService(_userRepositoryMock.Object, _loggerMock.Object, _mapperMock.Object);
+        var passwordHasherMock = new Mock<IPasswordHasher<User>>();
+        // Mock password hasher behavior
+        passwordHasherMock
+            .Setup(h => h.HashPassword(It.IsAny<User>(), It.IsAny<string>()))
+            .Returns((User u, string password) => new PasswordHasher<User>().HashPassword(u, password));
+
+        passwordHasherMock
+            .Setup(h => h.VerifyHashedPassword(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+            .Returns((User u, string hashedPassword, string providedPassword) =>
+            {
+                var hasher = new PasswordHasher<User>();
+                return hasher.VerifyHashedPassword(u, hashedPassword, providedPassword);
+            });
     }
 
     [Test]
-    public void AddUserAsync_InvalidUser_ThrowsException()
+    public void AddUser_UserNameExists_ThrowsArgumentException()
     {
-        // Arrange
-        var addUserDto = new AddUserDto
+        //Arrange
+        var existingUser = new User()
         {
             Username = "Pipi",
-            Password = "pipi"
+            Password = "1234",
+            UserId = 1,
         };
-
-        var mockUser = new User
+        var addPayload = new AddUserDto()
         {
-            Username = addUserDto.Username,
-            Password = addUserDto.Password,
-            UserId = 4
+            Username = "Pipi",
+            Password = "1234",
         };
-        // Mock repository behavior for duplicate username
-        _userRepositoryMock.Setup(repo => repo.AddUser(It.Is<User>(u => u.Username == addUserDto.Username)))
-            .ThrowsAsync(new ArgumentException($"Username {addUserDto.Username} is already taken"));
-        _mapperMock.Setup(mapper => mapper.Map<User>(addUserDto)).Returns(mockUser);
+        _userRepositoryMock.Setup(s => s.GetUsers(It.Is<GetUsersFilterDto>(f => f.Username == existingUser.Username)))
+            .ReturnsAsync(new List<User>()
+            {
+                existingUser
+            });
 
         // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _userService.AddUser(addUserDto));
-
-        Assert.That(exception, Is.Not.Null);
-        Assert.That(exception.Message, Is.EqualTo($"Username {addUserDto.Username} is already taken"));
+        Assert.That(async () => await _userService.AddUser(addPayload),
+            Throws.TypeOf<ArgumentException>().And.Message.EqualTo($"Username {addPayload.Username} is already taken"));
     }
+
 
     [Test]
     public async Task AddUserAsync_ValidUser_Success()
@@ -63,11 +76,12 @@ public class UserServiceTest
             Username = "Pipi1234",
             Password = "pipi"
         };
-
+        var passwordHasherMock = new PasswordHasher<User>();
+        var hashedPassword = passwordHasherMock.HashPassword(null, addUserDto.Password);
         var mockUser = new User
         {
             Username = addUserDto.Username,
-            Password = addUserDto.Password,
+            Password = hashedPassword,
             UserId = 4
         };
 
@@ -76,11 +90,14 @@ public class UserServiceTest
             UserId = mockUser.UserId,
             Username = mockUser.Username
         };
-
+        _userRepositoryMock.Setup(repo => repo.GetUsers(It.Is<GetUsersFilterDto>(u =>
+                u.Username == addUserDto.Username)))
+            .ReturnsAsync(new List<User>());
         _userRepositoryMock.Setup(repo => repo.AddUser(It.Is<User>(u =>
-                u.Username == addUserDto.Username && u.Password == addUserDto.Password)))
+                u.Username == addUserDto.Username &&
+                passwordHasherMock.VerifyHashedPassword(null, hashedPassword, addUserDto.Password) ==
+                PasswordVerificationResult.Success)))
             .ReturnsAsync(mockUser);
-
         _mapperMock.Setup(mapper => mapper.Map<User>(addUserDto)).Returns(mockUser);
         _mapperMock.Setup(mapper => mapper.Map<UserDto>(mockUser)).Returns(expectedUserDto);
 
@@ -173,7 +190,7 @@ public class UserServiceTest
                 Username = "Pipi",
             }
         };
-        _userRepositoryMock.Setup(s => s.GetUsers()).ReturnsAsync(users);
+        _userRepositoryMock.Setup(s => s.GetUsers(null)).ReturnsAsync(users);
         _mapperMock.Setup(s => s.Map<List<UserDto>>(users)).Returns(expectedUsers);
 
         //Act
@@ -208,11 +225,12 @@ public class UserServiceTest
     {
         //Assert
         var userId = 999;
-        _userRepositoryMock.Setup(s => s.DeleteUser(userId)).ThrowsAsync(new KeyNotFoundException("User does not exist"));
-        
+        _userRepositoryMock.Setup(s => s.DeleteUser(userId))
+            .ThrowsAsync(new KeyNotFoundException("User does not exist"));
+
         //Act
         var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () => await _userService.DeleteUser(userId));
-        
+
         //Assert
         Assert.That(exception.Message, Is.EqualTo("User does not exist"));
         _userRepositoryMock.Verify(repo => repo.DeleteUser(userId), Times.Once);
@@ -240,12 +258,15 @@ public class UserServiceTest
             Username = mockUser.Username,
         };
         _userRepositoryMock.Setup(s => s.GetUserById(userId)).ReturnsAsync(mockUser);
-        _userRepositoryMock.Setup(s => s.UpdateUser(It.Is<User>(u=>u.Username == mockUser.Username && u.Password==mockUser.Password))).ReturnsAsync(mockUser);
+        _userRepositoryMock
+            .Setup(s => s.UpdateUser(
+                It.Is<User>(u => u.Username == mockUser.Username && u.Password == mockUser.Password)))
+            .ReturnsAsync(mockUser);
         _mapperMock.Setup(s => s.Map<UserDto>(mockUser)).Returns(expectedUserDto);
-        
+
         //Act
         var result = await _userService.UpdateUser(userId, payload);
-        
+
         //Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Username, Is.EqualTo(expectedUserDto.Username));
@@ -264,12 +285,100 @@ public class UserServiceTest
         {
             Username = "UpdatedPipi",
         };
-        _userRepositoryMock.Setup(s => s.GetUserById(userId)).ThrowsAsync(new KeyNotFoundException("User does not exist"));
-        
+        _userRepositoryMock.Setup(s => s.GetUserById(userId))
+            .ThrowsAsync(new KeyNotFoundException("User does not exist"));
+
         //Act
-        var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () => await _userService.UpdateUser(userId, payload));
- 
+        var exception =
+            Assert.ThrowsAsync<KeyNotFoundException>(async () => await _userService.UpdateUser(userId, payload));
+
         //Assert
         Assert.That(exception.Message, Is.EqualTo("User does not exist"));
+    }
+
+
+    [Test]
+    public void Login_UserNameNotFound_ThrowsNotFoundException()
+    {
+        //Arrange
+        var existingUser = new User()
+        {
+            Username = "Pipi",
+            Password = "1234",
+            UserId = 1,
+        };
+        var addPayload = new AddUserDto()
+        {
+            Username = "Pipi",
+            Password = "1234",
+        };
+        _userRepositoryMock.Setup(s => s.GetUsers(It.Is<GetUsersFilterDto>(f => f.Username == existingUser.Username)))
+            .ReturnsAsync(new List<User>());
+
+
+        // Act & Assert
+        Assert.That(async () => await _userService.Login(addPayload),
+            Throws.TypeOf<KeyNotFoundException>().And.Message.EqualTo("Username not found"));
+    }
+
+    [Test]
+    public void Login_UserFound_NotMatchingPassword_ThrowsAuthenticationException()
+    {
+        //Arrange
+        var existingUser = new User()
+        {
+            Username = "Pipi",
+            Password = "1234",
+            UserId = 1,
+        };
+        var addPayload = new AddUserDto()
+        {
+            Username = "Pipi",
+            Password = "3456",
+        };
+        _userRepositoryMock.Setup(s => s.GetUsers(It.Is<GetUsersFilterDto>(f => f.Username == existingUser.Username)))
+            .ReturnsAsync(new List<User>() { existingUser });
+
+
+        // Act & Assert
+        Assert.That(async () => await _userService.Login(addPayload),
+            Throws.TypeOf<AuthenticationException>().And.Message.EqualTo("Invalid username or password"));
+    }
+
+    [Test]
+    public async Task Login_UserFound_MatchingCredentials_ReturnsMatchingUser()
+    {
+        //Arrange
+        var passwordHasher = new PasswordHasher<User>();
+        var existingUser = new User()
+        {
+            Username = "Pipi",
+            Password = passwordHasher.HashPassword(null, "1234"),
+            UserId = 1,
+        };
+        var existingUserDto = new UserDto()
+        {
+            UserId = existingUser.UserId,
+            Username = "Pipi",
+        };
+        var loginPayload = new AddUserDto()
+        {
+            Username = "Pipi",
+            Password = "1234",
+        };
+        _userRepositoryMock.Setup(s => s.GetUsers(It.Is<GetUsersFilterDto>(f => f.Username == existingUser.Username)))
+            .ReturnsAsync(new List<User>() { existingUser });
+        _mapperMock.Setup((m => m.Map<UserDto>(It.Is<User>(u =>
+            passwordHasher.VerifyHashedPassword(existingUser, existingUser.Password, loginPayload.Password) ==
+            PasswordVerificationResult.Success && u.Username == existingUser.Username &&
+            u.UserId == existingUser.UserId)))).Returns(existingUserDto);
+
+        // Act
+        var res = await _userService.Login(loginPayload);
+
+        //Assert
+        Assert.That(res, Is.Not.Null);
+        Assert.That(res.Username, Is.EqualTo(existingUser.Username));
+        Assert.That(res.UserId, Is.EqualTo(existingUser.UserId));
     }
 }

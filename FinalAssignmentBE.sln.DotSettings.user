@@ -11,6 +11,9 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2457b7cc_002Dc65a_002D4774_002D942e_002Df0acda346310/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from GameRuleServiceTest.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;Project Location="/Users/doxle/Desktop/FinalAssignmentBE/FinalAssignmentBETest" Presentation="&amp;lt;FinalAssignmentBETest&amp;gt;" /&gt;
 &lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=3b0a7805_002Db223_002D410f_002D9116_002D6afc63904412/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="AddUserAsync_ValidUser_Success" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Project Location="/Users/doxle/Desktop/FinalAssignmentBE/FinalAssignmentBETest" Presentation="&amp;lt;FinalAssignmentBETest&amp;gt;" /&gt;
+&lt;/SessionState&gt;</s:String>
 	
 	
 	

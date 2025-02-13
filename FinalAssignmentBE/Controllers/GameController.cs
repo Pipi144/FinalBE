@@ -20,15 +20,11 @@ namespace FinalAssignmentBE.Controllers
 
         // GET: api/<GameController>
         [HttpGet]
-        public async Task<ActionResult<List<GameDto>>> GetGames([FromQuery] long? createdByUserId)
+        public async Task<ActionResult<List<GameDto>>> GetGames([FromQuery] GetGamesParamsDto? getGamesParams)
         {
             try
             {
-                var getGamesParamsDto = new GetGamesParamsDto
-                {
-                    CreatedByUserId = createdByUserId
-                };
-                var games = await _gameService.GetAllGames(getGamesParamsDto);
+                var games = await _gameService.GetAllGames(getGamesParams);
                 return Ok(games);
             }
             catch (Exception e)

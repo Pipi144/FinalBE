@@ -6,6 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000") // ✅ Allow Next.js Frontend
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); // ✅ Important if using authentication cookies
+        });
+});
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
@@ -65,6 +78,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API v1"); });
 }
 
+app.UseCors(MyAllowSpecificOrigins);
 app.UseHttpsRedirection();
 app.UseRouting();
 app.MapControllers();

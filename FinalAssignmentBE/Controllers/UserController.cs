@@ -45,7 +45,7 @@ namespace FinalAssignmentBE.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+                throw;
             }
         }
 
@@ -61,7 +61,7 @@ namespace FinalAssignmentBE.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+                throw;
             }
         }
 
@@ -82,7 +82,7 @@ namespace FinalAssignmentBE.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+                throw;
             }
         }
 
@@ -100,7 +100,23 @@ namespace FinalAssignmentBE.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+                throw;
+            }
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<UserDto>> Login([FromBody] AddUserDto userDto)
+        {
+            try
+            {
+                Console.WriteLine("POST USER");
+                var addedUser = await _userService.Login(userDto);
+                return Ok(addedUser);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }

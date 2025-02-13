@@ -4,7 +4,7 @@ namespace FinalAssignmentBE.Dto;
 public class BasicGameDto
 {
     public long GameId { get; set; }
-    public string GameName { get; set; }
+    public required string GameName { get; set; }
     public int? TimeLimit { get; set; }
 
     public int NumberRange { get; set; }
@@ -41,4 +41,5 @@ public class UpdateGameDto
 {
     public string? GameName { get; set; }
     public int? TimeLimit { get; set; }
+    public int? NumberRange { get; set; }
 }

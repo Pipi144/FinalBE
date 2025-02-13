@@ -11,6 +11,8 @@ public class GameAttemptDto
     public DateTime AttemptedDate { get; set; } = DateTime.UtcNow;
     public long AttemptByUserId { get; set; }
     public UserDto AttemptByUser { get; set; }
+    
+    public List<GameQuestionDto> GameQuestions { get; set; } = new List<GameQuestionDto>(); 
 }
 
 

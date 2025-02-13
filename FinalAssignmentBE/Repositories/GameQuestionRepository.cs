@@ -1,5 +1,6 @@
 using FinalAssignmentBE.Interfaces;
 using FinalAssignmentBE.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinalAssignmentBE.Repositories;
 
@@ -18,7 +19,9 @@ public class GameQuestionRepository : IGameQuestionRepository
     {
         try
         {
-            var gameQuestion = await _context.GameQuestions.FindAsync(id);
+            var gameQuestion = await _context.GameQuestions.Include(q => q.GameAttempt).ThenInclude(a => a.Game)
+                .ThenInclude(g => g.GameRules)
+                .FirstOrDefaultAsync(q => q.Id == id);
             return gameQuestion;
         }
         catch (Exception e)

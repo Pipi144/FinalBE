@@ -104,8 +104,10 @@ public class GameService : IGameService
                 throw new KeyNotFoundException("Game not found");
             if (!string.IsNullOrEmpty(updateGameDto.GameName))
                 foundGame.GameName = updateGameDto.GameName;
-            if (updateGameDto.TimeLimit != null)
-                foundGame.TimeLimit = updateGameDto.TimeLimit;
+            if (updateGameDto.TimeLimit.HasValue)
+                foundGame.TimeLimit = updateGameDto.TimeLimit.Value;
+            if (updateGameDto.NumberRange.HasValue)
+                foundGame.NumberRange = updateGameDto.NumberRange.Value;
             var updatedGame = await _gameRepository.UpdateGame(foundGame);
             return _mapper.Map<GameDto>(updatedGame);
         }

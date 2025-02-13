@@ -24,6 +24,52 @@ public class GameAttemptRepositoryTest
         _gameAttemptRepository = new GameAttemptRepository(_dbContext, _mockLogger.Object);
 
         //Seed data
+        _dbContext.GameRules.AddRange(new List<GameRule>()
+        {
+            new GameRule()
+            {
+                GameId = 1,
+                RuleId = 1,
+                DivisibleNumber = 3,
+                ReplacedWord = "Pipi"
+            },
+
+            new GameRule()
+            {
+                GameId = 1,
+                RuleId = 2,
+                DivisibleNumber = 7,
+                ReplacedWord = "mary"
+            },
+            new GameRule()
+            {
+                GameId = 2,
+                RuleId = 3,
+                DivisibleNumber = 5,
+                ReplacedWord = "Metusela"
+            }
+        });
+        _dbContext.Games.AddRange(new List<Game>()
+        {
+            new Game()
+            {
+                GameId = 1,
+                GameName = "Pipi's game",
+                CreatedByUserId = 1,
+            },
+            new Game()
+            {
+                GameId = 2,
+                GameName = "Metusela's game",
+                CreatedByUserId = 2,
+            },
+            new Game()
+            {
+                GameId = 3,
+                GameName = "MK's game",
+                CreatedByUserId = 1
+            }
+        });
         _dbContext.GameAttempts.AddRange([
             new GameAttempt()
             {

@@ -1,3 +1,4 @@
+using FinalAssignmentBE.Dto;
 using FinalAssignmentBE.Interfaces;
 using FinalAssignmentBE.Models;
 using Microsoft.EntityFrameworkCore;
@@ -19,10 +20,6 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            var users = _context.Users.ToList();
-            var matchingUsernameUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == user.Username);
-            if (matchingUsernameUser != null)
-                throw new ArgumentException($"Username {matchingUsernameUser.Username} is already taken");
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
@@ -67,13 +64,23 @@ public class UserRepository : IUserRepository
         }
     }
 
-    public async Task<List<User>?> GetUsers()
+    public async Task<List<User>> GetUsers(GetUsersFilterDto? filter = null)
     {
         try
         {
-            var users = await _context.Users.ToListAsync();
+            var query = _context.Users.AsQueryable();
 
-            return users;
+            if (filter != null)
+            {
+                if (!String.IsNullOrEmpty(filter.Username))
+                    query = query.Where(u => u.Username == filter.Username);
+            }
+
+            // Apply default ordering by CreatedAt descending
+            query = query.OrderBy(g => g.Username);
+
+            // For read-only operations, disable change tracking
+            return await query.AsNoTracking().ToListAsync();
         }
         catch (Exception e)
         {
@@ -86,7 +93,7 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            if (id <0) 
+            if (id < 0)
                 throw new ArgumentException("User Id cannot be negative");
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
 

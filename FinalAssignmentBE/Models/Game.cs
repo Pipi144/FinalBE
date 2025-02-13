@@ -7,7 +7,7 @@ public class Game
 {
     [Key] public long GameId { get; set; }
     public string GameName { get; set; }
-    public int? TimeLimit { get; set; } = null;
+    public int TimeLimit { get; set; } = 0;
 
     public int NumberRange { get; set; } = 20;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -31,6 +31,7 @@ public class Game
 
         if (matchedWords.Any())
         {
+            Console.WriteLine($"Matched words: {string.Join(", ", matchedWords)}");
             var validAnswers = GetPermutations(matchedWords)
                 .Select(p => string.Join("", p))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);

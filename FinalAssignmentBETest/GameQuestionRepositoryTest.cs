@@ -43,6 +43,39 @@ public class GameQuestionRepositoryTest
                 }
             })
             ;
+        _dbContext.GameAttempts.AddRange([
+            new GameAttempt()
+            {
+                GameId = 1,
+                AttemptId = 1,
+                Score = 0,
+                AttemptedDate = DateTime.UtcNow,
+                AttemptByUserId = 2
+            },
+            new GameAttempt()
+            {
+                GameId = 2,
+                AttemptId = 2,
+                Score = 10,
+                AttemptedDate = DateTime.UtcNow,
+                AttemptByUserId = 2
+            }
+        ]);
+        _dbContext.Games.AddRange(new List<Game>()
+        {
+            new Game()
+            {
+                GameId = 1,
+                GameName = "Pipi's game",
+                CreatedByUserId = 1,
+            },
+            new Game()
+            {
+                GameId = 2,
+                GameName = "Metusela's game",
+                CreatedByUserId = 2,
+            },
+        });
         _dbContext.SaveChanges();
     }
 

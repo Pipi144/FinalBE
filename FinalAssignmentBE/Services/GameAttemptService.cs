@@ -1,3 +1,4 @@
+using System.Text.Json;
 using AutoMapper;
 using FinalAssignmentBE.Dto;
 using FinalAssignmentBE.Interfaces;
@@ -81,9 +82,19 @@ public class GameAttemptService : IGameAttemptService
             var foundQuestion = await _gameQuestionRepository.GetGameQuestionById(payload.QuestionId);
             if (foundQuestion == null)
                 throw new KeyNotFoundException($"Question with id {payload.QuestionId} not found");
-            var game = foundQuestion.GameAttempt.Game;
+            if (foundQuestion == null)
+                throw new KeyNotFoundException($"Question with id {payload.QuestionId} not found");
+
             var gameAttempt = foundQuestion.GameAttempt;
+            if (gameAttempt == null)
+                throw new InvalidOperationException("GameAttempt is missing for this question");
+
+            var game = gameAttempt.Game;
+            if (game == null)
+                throw new InvalidOperationException("Game is missing for this question");
+
             var isCorrect = game.CheckAnswer(foundQuestion.QuestionNumber, payload.Answer);
+
             foundQuestion.UserAnswer = payload.Answer;
             foundQuestion.IsCorrectAnswer = isCorrect;
             if (isCorrect) gameAttempt.Score += 1;

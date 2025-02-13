@@ -10,7 +10,8 @@ public class GameAttemptMapper : Profile
     {
         // Map GameAttempt to GameAttemptDto
         CreateMap<GameAttempt, GameAttemptDto>()
-            .ForMember(dest => dest.AttemptByUser, opt => opt.MapFrom(src => src.AttemptByUser));
+            .ForMember(dest => dest.AttemptByUser, opt => opt.MapFrom(src => src.AttemptByUser))
+            .ForMember(dest => dest.GameQuestions, opt => opt.MapFrom(src => src.GameQuestions));
 
         // Map AddGameAttemptDto to GameAttempt
         CreateMap<AddGameAttemptDto, GameAttempt>();
